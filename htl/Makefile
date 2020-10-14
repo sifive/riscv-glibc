@@ -214,7 +214,7 @@ install: $(inst_libdir)/libpthread.so
 
 $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
 			      $(objpfx)libpthread.so$(libpthread.so-version) \
-			      $(inst_libdir)/$(patsubst %,$(libtype.oS),\
+			      $(inst_libdir)/$(patsubst %,$(libtype.ons),\
 							$(libprefix)pthread) \
 			      $(+force)
 	(echo '/* GNU ld script';\
@@ -222,7 +222,7 @@ $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
 	 echo '   the static library, so try that secondarily.  */';\
 	 cat $<; \
 	 echo 'GROUP ( $(slibdir)/libpthread.so$(libpthread.so-version)' \
-	      '$(libdir)/$(patsubst %,$(libtype.oS),$(libprefix)pthread)'\
+	      '$(libdir)/$(patsubst %,$(libtype.ons),$(libprefix)pthread)'\
 	      ')' \
 	) > $@.new
 	mv -f $@.new $@

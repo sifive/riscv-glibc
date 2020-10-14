@@ -64,7 +64,7 @@ endif
 CFLAGS-.o += -fcf-protection
 CFLAGS-.os += -fcf-protection
 CFLAGS-.op += -fcf-protection
-CFLAGS-.oS += -fcf-protection
+CFLAGS-.ons += -fcf-protection
 
 # Compile assembly codes with <cet.h> when CET is enabled.
 asm-CPPFLAGS += -fcf-protection -include cet.h

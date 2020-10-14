@@ -44,4 +44,4 @@ BEGIN {
     }
   }
 }
-END { exit status }' */*.{o,os,oS}.d
+END { exit status }' */*.{o,os,ons}.d

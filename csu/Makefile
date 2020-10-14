@@ -64,7 +64,7 @@ CFLAGS-static-reloc.os += $(stack-protector)
 # <https://sourceware.org/bugzilla/show_bug.cgi?id=23323>,
 # <https://sourceware.org/ml/libc-alpha/2018-06/msg00717.html>.
 # Also see the note above regarding STACK_PROTECTOR_LEVEL.
-CFLAGS-elf-init.oS += $(stack-protector)
+CFLAGS-elf-init.ons += $(stack-protector)
 
 ifeq (yes,$(build-shared))
 extra-objs += S$(start-installed-name) gmon-start.os

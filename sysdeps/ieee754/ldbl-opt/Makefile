@@ -49,7 +49,7 @@ libnldbl-calls = asprintf dprintf fprintf fscanf fwprintf fwscanf iovfscanf \
 libnldbl-routines = $(libnldbl-calls:%=nldbl-%)
 libnldbl-inhibit-o = $(object-suffixes)
 libnldbl-static-only-routines = $(libnldbl-routines)
-extra-objs += $(addsuffix .oS, $(libnldbl-routines))
+extra-objs += $(addsuffix .ons, $(libnldbl-routines))
 
 CFLAGS-nldbl-acos.c = -fno-builtin-acosl
 CFLAGS-nldbl-acosh.c = -fno-builtin-acoshl
