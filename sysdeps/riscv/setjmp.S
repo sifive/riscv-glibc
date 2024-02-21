@@ -20,14 +20,17 @@
 #include <sys/asm.h>
 
 ENTRY (_setjmp)
+  LPAD
   li	a1, 0
   j	HIDDEN_JUMPTARGET (__sigsetjmp)
 END (_setjmp)
 ENTRY (setjmp)
+  LPAD
   li	a1, 1
   /* Fallthrough */
 END (setjmp)
 ENTRY (__sigsetjmp)
+	LPAD
 	REG_S ra,  0*SZREG(a0)
 	REG_S s0,  1*SZREG(a0)
 	REG_S s1,  2*SZREG(a0)

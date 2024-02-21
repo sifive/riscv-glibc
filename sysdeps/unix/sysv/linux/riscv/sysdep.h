@@ -53,6 +53,75 @@
 
 # include <sys/asm.h>
 
+/* GNU_PROPERTY_RISCV_* macros from elf.h for use in asm code.  */
+#define FEATURE_1_AND 0xc0000000
+
+/* Add a NT_GNU_PROPERTY_TYPE_0 note.  */
+#if __riscv_xlen == 32
+# define GNU_PROPERTY(type, value)	\
+   .section .note.gnu.property, "a";	\
+   .p2align 2;				\
+   .word 4;				\
+   .word 12;				\
+   .word 5;				\
+   .asciz "GNU";			\
+   .word type;				\
+   .word 4;				\
+   .word value;				\
+   .text
+#else
+# define GNU_PROPERTY(type, value)	\
+   .section .note.gnu.property, "a";	\
+   .p2align 3;				\
+   .word 4;				\
+   .word 16;				\
+   .word 5;				\
+   .asciz "GNU";			\
+   .word type;				\
+   .word 4;				\
+   .word value;				\
+   .word 0;				\
+   .text
+#endif
+
+/* Add GNU property note with the supported features to all asm code
+   where sysdep.h is included.  */
+#undef __VALUE_FOR_FEATURE_1_AND
+#if defined (__riscv_landing_pad) || defined (__riscv_shadow_stack)
+#  if defined (__riscv_landing_pad_unlabeled)
+#    if defined (__riscv_shadow_stack)
+#      define __VALUE_FOR_FEATURE_1_AND 0x3
+#    else
+#      define __VALUE_FOR_FEATURE_1_AND 0x1
+#    endif
+#  elif defined (__riscv_landing_pad_func_sig)
+#    if defined (__riscv_shadow_stack)
+#      define __VALUE_FOR_FEATURE_1_AND 0x6
+#    else
+#      define __VALUE_FOR_FEATURE_1_AND 0x4
+#    endif
+#  else
+#    if defined (__riscv_shadow_stack)
+#      define __VALUE_FOR_FEATURE_1_AND 0x2
+#    else
+#      error "What?"
+#    endif
+#  endif
+#endif
+
+#if defined (__VALUE_FOR_FEATURE_1_AND)
+GNU_PROPERTY (FEATURE_1_AND, __VALUE_FOR_FEATURE_1_AND)
+#endif
+#undef __VALUE_FOR_FEATURE_1_AND
+
+#ifdef __riscv_landing_pad_unlabeled
+# define SET_LPAD
+# define LPAD       lpad 0
+#else
+# define SET_LPAD
+# define LPAD
+#endif
+
 # define ENTRY(name) LEAF(name)
 
 # define L(label) .L ## label
@@ -64,6 +133,7 @@
   .text;							\
   .align 2;							\
   ENTRY (name);							\
+  LPAD;           						\
   li a7, SYS_ify (syscall_name);				\
   scall;							\
   li a7, -4096;							\
@@ -111,6 +181,7 @@
 # define PSEUDO_NOERRNO(name, syscall_name, args)	\
   .align 2;						\
   ENTRY (name);						\
+  LPAD;           					\
   li a7, SYS_ify (syscall_name);			\
   scall;
 

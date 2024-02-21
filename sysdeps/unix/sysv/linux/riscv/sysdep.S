@@ -23,6 +23,7 @@
 #endif
 
 ENTRY (__syscall_error)
+	LPAD
 	mv t0, ra
 	/* Fall through to __syscall_set_errno.  */
 END (__syscall_error)

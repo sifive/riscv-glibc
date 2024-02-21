@@ -47,12 +47,14 @@ ENTRY (ENTRY_POINT)
 	   .cfi_label to force starting the FDE.  */
 	.cfi_label .Ldummy
 	cfi_undefined (ra)
+	LPAD
 	call  load_gp
 	mv    a5, a0  /* rtld_fini.  */
 	/* main may be in a shared library.  */
 #if defined PIC && !defined SHARED
 	/* Avoid relocation in static PIE since _start is called before it
 	   is relocated.  */
+	SET_LPAD
 	lla   a0, __wrap_main
 #else
 	la   a0, main
@@ -69,7 +71,11 @@ ENTRY (ENTRY_POINT)
 END (ENTRY_POINT)
 
 #if defined PIC && !defined SHARED
+#ifdef __riscv_landing_pad
+	.align 2
+#endif /* __riscv_landing_pad  */
 __wrap_main:
+	LPAD
 	tail  main@plt
 #endif
 
@@ -79,9 +85,13 @@ __wrap_main:
    needs to be initialized before calling __libc_start_main in that case.
    So we redundantly initialize it at the beginning of _start.  */
 
+#ifdef __riscv_landing_pad
+	.align 2
+#endif /* __riscv_landing_pad  */
 load_gp:
 .option push
 .option norelax
+	LPAD
 	lla   gp, __global_pointer$
 .option pop
 	ret

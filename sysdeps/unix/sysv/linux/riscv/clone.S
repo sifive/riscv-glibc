@@ -31,6 +31,7 @@
 
 	.text
 LEAF (__clone)
+	LPAD
 
 	/* Align stack to a 128-bit boundary as per RISC-V ABI.  */
 	andi		a1,a1,ALMASK
@@ -82,6 +83,7 @@ L (thread_start):
 	REG_L		a0,SZREG(sp)	/* Argument pointer.  */
 
 	/* Call the user's function.  */
+	SET_LPAD
 	jalr		a1
 
 	/* Call exit with the function's return value.  */
