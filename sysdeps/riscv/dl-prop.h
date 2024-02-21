@@ -19,14 +19,23 @@
 #ifndef _DL_PROP_H
 #define _DL_PROP_H
 
+extern void _dl_cfi_check (struct link_map *, const char *)
+    attribute_hidden;
+
 static inline void __attribute__ ((always_inline))
 _rtld_main_check (struct link_map *m, const char *program)
 {
+#if defined(__riscv_landing_pad) || defined(__riscv_shadow_stack)
+  _dl_cfi_check(m, program);
+#endif /* __riscv_landing_pad || __riscv_shadow_stack */
 }
 
 static inline void __attribute__ ((always_inline))
 _dl_open_check (struct link_map *m, int dl_openmode)
 {
+#if defined(__riscv_landing_pad) || defined(__riscv_shadow_stack)
+  _dl_cfi_check(m, NULL);
+#endif /* __riscv_landing_pad || __riscv_shadow_stack */
 }
 
 static inline void __attribute__ ((always_inline))

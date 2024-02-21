@@ -1,0 +1,5 @@
+#define SHARED 1
+
+#include <ldsodefs.h>
+
+RTLD_GLOBAL_DL_RISCV_FEATURE_1_OFFSET offsetof (struct rtld_global, _dl_riscv_feature_1)
