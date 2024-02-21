@@ -82,6 +82,7 @@ L (thread_start):
 	REG_L		a0,SZREG(sp)	/* Argument pointer.  */
 
 	/* Call the user's function.  */
+	SET_LPAD
 	jalr		a1
 
 	/* Call exit with the function's return value.  */
