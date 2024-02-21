@@ -29,6 +29,7 @@
 
 	.text
 LEAF (__libc_vfork)
+	LPAD
 
 	li	a0, (CLONE_VFORK | CLONE_VM | SIGCHLD)
 	mv	a1, sp

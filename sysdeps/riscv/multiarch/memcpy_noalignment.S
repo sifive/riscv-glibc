@@ -35,7 +35,11 @@
 # define BLOCK_SIZE (16 * SZREG)
 
 	.attribute unaligned_access, 1
+#ifdef __riscv_landing_pad
+        .align  2
+#endif
 ENTRY (__memcpy_noalignment)
+        LPAD
 	beq	a2, zero, L(ret)
 
 	/* if LEN < SZREG jump to tail handling.  */

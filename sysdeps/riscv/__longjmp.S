@@ -20,6 +20,7 @@
 #include <sys/asm.h>
 
 ENTRY (__longjmp)
+	LPAD
 	REG_L ra,  0*SZREG(a0)
 	REG_L s0,  1*SZREG(a0)
 	REG_L s1,  2*SZREG(a0)

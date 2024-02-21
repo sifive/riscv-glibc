@@ -46,13 +46,23 @@
 # endif
 #endif
 
+/* Landing pad for Zicfilp CFI.  */
+#ifndef LPAD
+# ifdef __riscv_landing_pad_unlabeled
+#  define LPAD	lpad 0
+# else
+#  define LPAD
+# endif
+#endif
+
 /* Declare leaf routine.  */
 #define	LEAF(symbol)				\
 		.globl	symbol;			\
 		.align	2;			\
 		.type	symbol,@function;	\
 symbol:						\
-		cfi_startproc;
+		cfi_startproc;			\
+		LPAD;
 
 /* Mark end of function.  */
 #undef END

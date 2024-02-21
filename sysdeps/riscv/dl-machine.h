@@ -28,6 +28,13 @@
 #include <dl-irel.h>
 #include <dl-static-tls.h>
 #include <dl-machine-rel.h>
+/* This is a marker to remind us to add real expansion to setup the label
+   for the function signature label scheme in the future  */
+#ifdef __riscv_landing_pad_unlabeled
+# define SET_LPAD
+#else
+# define SET_LPAD
+#endif
 
 #ifndef _RTLD_PROLOGUE
 # define _RTLD_PROLOGUE(entry)						\
@@ -127,6 +134,7 @@ elf_machine_dynamic (void)
 	# Pass our finalizer function to _start.\n\
 	lla a0, _dl_fini\n\
 	# Jump to the user entry point.\n\
+        " STRINGXV (SET_LPAD) "\n\
 	jr s0\n\
 	" _RTLD_EPILOGUE (ENTRY_POINT) \
 	  _RTLD_EPILOGUE (_dl_start_user) "\
