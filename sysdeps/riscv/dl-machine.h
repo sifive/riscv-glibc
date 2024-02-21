@@ -120,6 +120,8 @@ elf_machine_dynamic (void)
 	" _RTLD_PROLOGUE (_dl_start_user) "\
 	# Stash user entry point in s0.\n\
 	mv s0, a0\n\
+	# Setup CFI features\n\
+	" RTLD_START_ENABLE_RISCV_CFI "\
 	# Load the adjusted argument count.\n\
 	" STRINGXP (REG_L) " a1, 0(sp)\n\
 	# Call _dl_init (struct link_map *main_map, int argc, char **argv, char **env) \n\
