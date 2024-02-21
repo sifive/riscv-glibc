@@ -28,6 +28,12 @@
 #include <dl-irel.h>
 #include <dl-static-tls.h>
 #include <dl-machine-rel.h>
+#if defined(__riscv_landing_pad) || defined(__riscv_shadow_stack)
+# include <dl-cfi.h>
+extern void _dl_cfi_setup_features (unsigned int features);
+#else
+# define RTLD_START_ENABLE_RISCV_CFI
+#endif
 /* This is a marker to remind us to add real expansion to setup the label
    for the function signature label scheme in the future  */
 #ifdef __riscv_landing_pad_unlabeled
