@@ -18,6 +18,7 @@ endif
 
 # Enable RISC-V CFI
 ifeq (yes,$(riscv-enable-cfi))
+sysdep-dl-routines += dl-cfi
 CFLAGS-.o += -fcf-protection=full
 CFLAGS-.os += -fcf-protection=full
 CFLAGS-.op += -fcf-protection=full
