@@ -57,4 +57,21 @@ PROCINFO_CLASS unsigned int _dl_riscv_feature_1
 # else
 ,
 # endif
+
+# if !defined PROCINFO_DECL && defined SHARED
+  ._dl_riscv_feature_control
+# else
+PROCINFO_CLASS struct dl_riscv_feature_control _dl_riscv_feature_control
+# endif
+# ifndef PROCINFO_DECL
+= {
+    .lp = cfi_always_on,
+    .ss = cfi_always_on,
+  }
+# endif
+# if !defined SHARED || defined PROCINFO_DECL
+;
+# else
+,
+# endif
 #endif
