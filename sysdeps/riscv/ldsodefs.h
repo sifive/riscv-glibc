@@ -20,6 +20,7 @@
 #define _RISCV_LDSODEFS_H 1
 
 #include <elf.h>
+#include <feature-control.h>
 
 struct La_riscv_regs;
 struct La_riscv_retval;
