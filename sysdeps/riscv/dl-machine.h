@@ -41,6 +41,7 @@ extern void _dl_cfi_setup_features (unsigned int features);
 #else
 # define SET_LPAD
 #endif
+extern void _dl_riscv_init_cpu_features (void);
 
 #ifndef _RTLD_PROLOGUE
 # define _RTLD_PROLOGUE(entry)						\
@@ -152,6 +153,24 @@ elf_machine_dynamic (void)
 /* Names of the architecture-specific auditing callback functions.  */
 #define ARCH_LA_PLTENTER riscv_gnu_pltenter
 #define ARCH_LA_PLTEXIT riscv_gnu_pltexit
+
+/* We define an initialization function.  This is called very early in
+   _dl_sysdep_start.  */
+#define DL_PLATFORM_INIT dl_platform_init ()
+
+static inline void __attribute__ ((unused))
+dl_platform_init (void)
+{
+  if (GLRO(dl_platform) != NULL && *GLRO(dl_platform) == '\0')
+    /* Avoid an empty string which would disturb us.  */
+    GLRO(dl_platform) = NULL;
+
+#ifdef SHARED
+  /* init_cpu_features which has been called early from __libc_start_main in
+     static executable.  */
+  _dl_riscv_init_cpu_features ();
+#endif
+}
 
 /* Bias .got.plt entry by the offset requested by the PLT header.  */
 #define elf_machine_plt_value(map, reloc, value) (value)

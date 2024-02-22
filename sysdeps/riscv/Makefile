@@ -1,6 +1,7 @@
 ifeq ($(subdir),misc)
 sysdep_headers += sys/asm.h
 endif
+sysdep-dl-routines += dl-get-cpu-features
 
 ifeq ($(subdir),elf)
 gen-as-const-headers += dl-link.sym features-offsets.sym

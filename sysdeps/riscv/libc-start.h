@@ -31,6 +31,15 @@ get_cfi_feature (void)
 {
   unsigned int cfi_feature = 0;
   /* FIXME: check if cfi feature is supported by CPU  */
+
+#ifdef __riscv_landing_pad
+  if (GL(dl_riscv_feature_control).lp != cfi_always_off)
+    cfi_feature |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
+#endif
+#ifdef __riscv_shadow_stack
+  if (GL(dl_riscv_feature_control).ss != cfi_always_off)
+    cfi_feature |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS;
+#endif
   struct link_map *main_map = _dl_get_dl_main_map ();
 
   /* Scan program headers backward to check PT_GNU_PROPERTY early for
@@ -43,9 +52,7 @@ get_cfi_feature (void)
         _dl_process_pt_gnu_property (main_map, -1, &ph[-1]);
         /* Enable landing pad and shstk only if they are enabled on a static
            executable.  */
-        /* FIXME: change to &= to mask off other features after cpu_feature
-           is implemented  */
-        cfi_feature = (main_map->l_riscv_feature_1_and
+        cfi_feature &= (main_map->l_riscv_feature_1_and
                        & (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
                           | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS));
 
