@@ -18,6 +18,7 @@
 
 #include <sysdep.h>
 #include <sys/asm.h>
+#include <jmp_buf-ssp.h>
 
 ENTRY (_setjmp)
   LPAD
@@ -59,6 +60,12 @@ ENTRY (__sigsetjmp)
 	FREG_S fs9, 14*SZREG+ 9*SZFREG(a0)
 	FREG_S fs10,14*SZREG+10*SZFREG(a0)
 	FREG_S fs11,14*SZREG+11*SZFREG(a0)
+#endif
+
+#ifdef __riscv_shadow_stack
+        /* read ssp into t0  */
+        ssrdp t0
+	REG_S t0, SSP_OFFSET(a0)
 #endif
 
 #if !IS_IN (libc) && IS_IN (rtld)

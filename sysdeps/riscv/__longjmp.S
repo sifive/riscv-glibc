@@ -18,6 +18,7 @@
 
 #include <sysdep.h>
 #include <sys/asm.h>
+#include <jmp_buf-ssp.h>
 
 ENTRY (__longjmp)
 	LPAD
@@ -49,6 +50,35 @@ ENTRY (__longjmp)
 	FREG_L fs9, 14*SZREG+ 9*SZFREG(a0)
 	FREG_L fs10,14*SZREG+10*SZFREG(a0)
 	FREG_L fs11,14*SZREG+11*SZFREG(a0)
+#endif
+
+#ifdef __riscv_shadow_stack
+	/* skip unwinding if ss is not enabled  */
+	ssrdp t0
+	beqz  t0, .Lunwind_fin
+	REG_L t1, SSP_OFFSET(a0)
+.Lunwind:
+	bleu  t1, t0, .Lunwind_fin
+	/* Increase ssp by at most a page size to ensure always run into a
+	   guard page before accidentally point to another legal shadow stack
+	   page  */
+	/* t0 = (t1 - t0 >= 4096) ? t0 + 4096 : t1  */
+	lui   a0, 1
+	add   t0, t0, a0
+	bleu  t0, t1, 1f
+	mv    t0, t1
+1:
+	csrw  ssp, t0
+	/* Test if the location pointed by ssp is legal  */
+	sspush x5
+	sspopchk x5
+	j .Lunwind
+.Lunwind_fin:
+	seqz a0, a1
+	add  a0, a0, a1   # a0 = (a1 == 0) ? 1 : a1
+	/* Use indirect branch if CFI is enabled  */
+	mv   t1, ra
+	jr   t1
 #endif
 
 	seqz a0, a1
