@@ -34,6 +34,10 @@ typedef struct __jmp_buf_internal_tag
 #elif !defined __riscv_float_abi_soft
 # error unsupported FLEN
 #endif
+#ifdef __riscv_shadow_stack
+    /* Shadow stack pointer.  */
+    long int __ssp;
+#endif
   } __jmp_buf[1];
 
 #endif /* _RISCV_BITS_SETJMP_H */
