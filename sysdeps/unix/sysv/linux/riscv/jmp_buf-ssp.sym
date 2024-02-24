@@ -1,0 +1,7 @@
+#include <setjmpP.h>
+#include <stddef.h>
+#undef __saved_mask
+
+--
+SSP_OFFSET offsetof(struct __jmp_buf_tag, __saved_mask.__saved.__ssp)
+SSP_BASE_OFFSET offsetof(struct __jmp_buf_tag, __saved_mask.__saved.__ssp_base)
