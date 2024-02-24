@@ -11,6 +11,10 @@ endif
 # of some assembler macros.
 ASFLAGS-.os += $(pic-ccflag)
 
+ifeq ($(subdir),setjmp)
+gen-as-const-headers += jmp_buf-ssp.sym
+endif
+
 ifeq (no,$(riscv-r-align))
 ASFLAGS-.os += -Wa,-mno-relax
 ASFLAGS-.o += -Wa,-mno-relax

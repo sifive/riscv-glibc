@@ -18,6 +18,8 @@
 
 #include <sysdep.h>
 #include <sys/asm.h>
+#include <jmp_buf-ssp.h>
+#include <tcb-offsets.h>
 
 ENTRY (_setjmp)
   LPAD
@@ -59,6 +61,26 @@ ENTRY (__sigsetjmp)
 	FREG_S fs9, 14*SZREG+ 9*SZFREG(a0)
 	FREG_S fs10,14*SZREG+10*SZFREG(a0)
 	FREG_S fs11,14*SZREG+11*SZFREG(a0)
+#endif
+
+#ifdef __riscv_shadow_stack
+	/* Skip if shadow stack is not enabled */
+	ssrdp	t0
+	beqz	t0, .Lfin
+
+	/* Read ssp_base from TLS  */
+	REG_L	t2, TLS_SSP_BASE_OFFSET(tp)
+	bnez	t2, .Lbase_saved
+
+	/* if not found, use current ssp as the marker  */
+	mv	t2, t0
+	REG_S	t2, TLS_SSP_BASE_OFFSET(tp)
+
+.Lbase_saved:
+	/* Save caller's ssp and base marker to jmp_buf  */
+	REG_S	t0, SSP_OFFSET(a0)
+	REG_S	t2, SSP_BASE_OFFSET(a0)
+.Lfin:
 #endif
 
 #if !IS_IN (libc) && IS_IN (rtld)
