@@ -27,6 +27,9 @@
     beqz  a0, 1f \n\
     li   a0, " STRINGXP (PR_SET_SHADOW_STACK_STATUS) "\n\
     li   a1, " STRINGXP (PR_SHADOW_STACK_ENABLE) "\n\
+    li   a2, 0 \n\
+    li   a3, 0 \n\
+    li   a4, 0 \n\
     li   a7, " STRINGXP (__NR_prctl) "\n\
     ecall \n\
 1: \n\

@@ -228,7 +228,7 @@ _dl_cfi_setup_features (unsigned int feature_1)
 #ifdef __riscv_zicfilp
   if (feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_FCFI)
     INTERNAL_SYSCALL_CALL (prctl, PR_SET_INDIR_BR_LP_STATUS,
-                           PR_INDIR_BR_LP_ENABLE);
+                           PR_INDIR_BR_LP_ENABLE, 0, 0, 0);
 #endif /* __riscv_zicfilp  */
   /* FIXME: Read enabled features from kernel and re-sync  */
 }
