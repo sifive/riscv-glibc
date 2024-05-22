@@ -115,6 +115,7 @@ GNU_PROPERTY (FEATURE_1_AND, __VALUE_FOR_FEATURE_1_AND)
   .text;							\
   .align 2;							\
   ENTRY (name);							\
+  LPAD;           						\
   li a7, SYS_ify (syscall_name);				\
   scall;							\
   li a7, -4096;							\
@@ -162,6 +163,7 @@ GNU_PROPERTY (FEATURE_1_AND, __VALUE_FOR_FEATURE_1_AND)
 # define PSEUDO_NOERRNO(name, syscall_name, args)	\
   .align 2;						\
   ENTRY (name);						\
+  LPAD;           					\
   li a7, SYS_ify (syscall_name);			\
   scall;
 
