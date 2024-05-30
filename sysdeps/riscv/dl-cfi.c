@@ -208,6 +208,7 @@ dl_cfi_check_dlopen (struct link_map *m, struct dl_cfi_info *info)
     _dl_signal_error (0, m->l_initfini[legacy_obj]->l_name, "dlopen", msg);
 
   if (disable_feature_1 != 0)
+    {
       // FIXME: Disable CFI here
       int res = -1;
       if (res)
@@ -238,7 +239,7 @@ void
 _dl_cfi_check (struct link_map *l, const char *program)
 {
     /* As this point we have parsed the gnu properties
-       For dynamic binary we should verify the dependencies here
+       For dynamic binary we should verify the dependencies here.  */
   struct dl_cfi_info info;
 #if defined SHARED && defined RTLD_START_ENABLE_RISCV_CFI
   if (program)
