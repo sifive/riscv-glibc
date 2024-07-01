@@ -106,8 +106,8 @@ dl_check_legacy_object (struct link_map *m, struct dl_cfi_info *info)
           info->feature_1_legacy_ss = i;
           info->feature_1_legacy |= GNU_PROPERTY_RISCV_FEATURE_1_BCFI;
         }
-    }
 #endif
+    }
 
   /* Keep bits set if cfi_always_on */
 #ifdef __riscv_zicfilp
