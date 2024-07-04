@@ -48,3 +48,68 @@
     jal  _dl_cfi_setup_features \n\
     \n\
 "
+
+static __always_inline int
+dl_cfi_disable_cfi (unsigned int feature) {
+  int res = 0;
+#ifdef __riscv_landing_pad
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+    {
+      res = prctl (PR_SET_INDIR_BR_LP_STATUS, 0, 0, 0, 0);
+      if (res)
+        return res;
+    }
+#endif /* __riscv_landing_pad  */
+#ifdef __riscv_shadow_stack
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)
+    {
+      res |= prctl (PR_SET_SHADOW_STACK_STATUS, 0, 0, 0, 0);
+      if (res)
+        return res;
+    }
+#endif /* __riscv_shadow_stack  */
+  return 0;
+}
+
+static __always_inline int
+dl_cfi_lock_cfi (unsigned int feature)
+{
+  int res = 0;
+#ifdef __riscv_landing_pad
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+    res |= prctl (PR_LOCK_INDIR_BR_LP_STATUS, 0, 0, 0, 0);
+#endif /* __riscv_landing_pad  */
+#ifdef __riscv_shadow_stack
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)
+    res |= prctl (PR_LOCK_SHADOW_STACK_STATUS, 0, 0, 0, 0);
+#endif /* __riscv_shadow_stack  */
+  return res;
+}
+
+static __always_inline int
+dl_cfi_get_cfi_status (void) {
+  int status = 0;
+  unsigned long buf = 0;
+  int ret = 0;
+#ifdef __riscv_landing_pad
+    ret = prctl (PR_GET_INDIR_BR_LP_STATUS, &buf, 0, 0, 0);
+    if (!ret && buf)
+      status |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
+#endif /* __riscv_landing_pad  */
+#ifdef __riscv_shadow_stack
+    ret = prctl (PR_GET_SHADOW_STACK_STATUS, &buf, 0, 0, 0);
+    if (!ret && buf)
+      status |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS;
+#endif /* __riscv_shadow_stack  */
+  return status;
+}
+
+#ifdef __riscv_landing_pad
+static __always_inline int
+dl_cfi_enable_lp (unsigned int feature) {
+  if (!(feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED))
+    return -1;
+  return INTERNAL_SYSCALL_CALL (prctl, PR_SET_INDIR_BR_LP_STATUS,
+                                PR_INDIR_BR_LP_ENABLE, 0, 0, 0);
+}
+#endif /* __riscv_landing_pad  */
