@@ -23,14 +23,14 @@
 #ifdef __riscv_zicfiss
 # define CHECK_AND_ENABLE_SHADOW_STACK \
 "\
-    andi a0, s1, " STRINGXP (GNU_PROPERTY_RISCV_FEATURE_1_BCFI) "\n\
+    andi  a0, s1, " STRINGXP (GNU_PROPERTY_RISCV_FEATURE_1_BCFI) "\n\
     beqz  a0, 1f \n\
-    li   a0, " STRINGXP (PR_SET_SHADOW_STACK_STATUS) "\n\
-    li   a1, " STRINGXP (PR_SHADOW_STACK_ENABLE) "\n\
-    li   a2, 0 \n\
-    li   a3, 0 \n\
-    li   a4, 0 \n\
-    li   a7, " STRINGXP (__NR_prctl) "\n\
+    li    a0, " STRINGXP (PR_SET_SHADOW_STACK_STATUS) "\n\
+    li    a1, " STRINGXP (PR_SHADOW_STACK_ENABLE) "\n\
+    li    a2, 0 \n\
+    li    a3, 0 \n\
+    li    a4, 0 \n\
+    li    a7, " STRINGXP (__NR_prctl) "\n\
     ecall \n\
 1: \n\
 "
@@ -40,7 +40,7 @@
 
 #define RTLD_START_ENABLE_RISCV_CFI \
 "\
-    lw s1, _rtld_local + " STRINGXP (RTLD_GLOBAL_DL_RISCV_FEATURE_1_OFFSET) " \n\
+    lw   s1, _rtld_local + " STRINGXP (RTLD_GLOBAL_DL_RISCV_FEATURE_1_OFFSET) " \n\
     # We need to enable shadow stack in the assembly code to avoid underflow \n\
     # Checking for landing pad is left to _dl_cfi_setup_features \n\
     " CHECK_AND_ENABLE_SHADOW_STACK "\n\
@@ -48,3 +48,70 @@
     jal  _dl_cfi_setup_features \n\
     \n\
 "
+
+static __always_inline int
+dl_cfi_disable_cfi (unsigned int feature) {
+  int res = 0;
+#ifdef __riscv_zicfilp
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_FCFI)
+    {
+      res = prctl (PR_SET_INDIR_BR_LP_STATUS, 0);
+      if (res)
+        return res;
+    }
+#endif /* __riscv_zicfilp  */
+#ifdef __riscv_zicfiss
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_BCFI)
+    {
+      res |= prctl (PR_SET_SHADOW_STACK_STATUS, 0);
+      if (res)
+        return res;
+    }
+#endif /* __riscv_zicfiss  */
+  return 0;
+}
+
+static __always_inline int
+dl_cfi_lock_cfi (unsigned int feature)
+{
+  int res = 0;
+#ifdef __riscv_zicfilp
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_FCFI
+      && GL(dl_riscv_feature_control).lp == cfi_always_on)
+    res |= prctl (PR_LOCK_INDIR_BR_LP_STATUS);
+#endif /* __riscv_zicfilp  */
+#ifdef __riscv_zicfiss
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_BCFI
+      && GL(dl_riscv_feature_control).ss == cfi_always_on)
+    res |= prctl (PR_LOCK_SHADOW_STACK_STATUS);
+#endif /* __riscv_zicfiss  */
+  return res;
+}
+
+static __always_inline int
+dl_cfi_get_cfi_status (void) {
+  int status = 0;
+  int buf = 0;
+  int ret = 0;
+#ifdef __riscv_zicfilp
+    ret = prctl (PR_GET_INDIR_BR_LP_STATUS, &buf);
+    if (!ret && buf)
+      status |= GNU_PROPERTY_RISCV_FEATURE_1_FCFI;
+#endif /* __riscv_zicfilp  */
+#ifdef __riscv_zicfiss
+    ret = prctl (PR_GET_SHADOW_STACK_STATUS, &buf);
+    if (!ret && buf)
+      status |= GNU_PROPERTY_RISCV_FEATURE_1_BCFI;
+#endif /* __riscv_zicfiss  */
+  return status;
+}
+
+#ifdef __riscv_zicfilp
+static __always_inline int
+dl_cfi_enable_lp (unsigned int feature) {
+  if (!(feature & GNU_PROPERTY_RISCV_FEATURE_1_FCFI))
+    return -1;
+  return INTERNAL_SYSCALL_CALL (prctl, PR_SET_INDIR_BR_LP_STATUS,
+                                PR_INDIR_BR_LP_ENABLE, 0, 0, 0);
+}
+#endif /* __riscv_zicfilp  */
