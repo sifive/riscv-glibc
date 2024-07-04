@@ -57,7 +57,7 @@ struct dl_cfi_info
 static void
 dl_check_legacy_object (struct link_map *m, struct dl_cfi_info *info)
 {
-  /* Iterate through the dependencies and disable if needed here  */
+  /* Iterate through the dependencies and record legacy objects  */
   struct link_map *l = NULL;
   unsigned int i;
   i = m->l_searchlist.r_nlist;
@@ -86,7 +86,11 @@ dl_check_legacy_object (struct link_map *m, struct dl_cfi_info *info)
                                   | ~(GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
                                      | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS));
 
-      /* Bookkeeping legacy objects  */
+      /* Bookkeeping first found mismatch object for both lp/ss.
+         These information would only be used by dlopen check for now.
+         A dependency with a feature on will be record as legacy if the task
+         did not enable the feature, however it is safe because the following
+         check will only be performed if the task has the feature on.  */
 #ifdef __riscv_landing_pad
       if ((info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED) == 0
           && ((info->enable_feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
@@ -208,8 +212,8 @@ dl_cfi_check_dlopen (struct link_map *m, struct dl_cfi_info *info)
     _dl_signal_error (0, m->l_initfini[legacy_obj]->l_name, "dlopen", msg);
 
   if (disable_feature_1 != 0)
-      // FIXME: Disable CFI here
-      int res = -1;
+    {
+      int res = dl_cfi_disable_cfi (disable_feature_1);
       if (res)
         {
           msg = N_("can't disable CFI feature");
@@ -223,14 +227,29 @@ dl_cfi_check_dlopen (struct link_map *m, struct dl_cfi_info *info)
 attribute_hidden void
 _dl_cfi_setup_features (unsigned int feature_1)
 {
-  /* Since prctl could fail to enable some features
-     use prctl to get enabled features again and sync it back.  */
+  /* Enable features. Shadow stack is enabled earlier as it should
+   * be enabled in a function that never returns.  */
 #ifdef __riscv_landing_pad
-  if (feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
-    INTERNAL_SYSCALL_CALL (prctl, PR_SET_CFI, PR_CFI_BRANCH_LANDING_PADS,
-                           PR_CFI_ENABLE, 0, 0, 0);
+  dl_cfi_enable_lp (feature_1);
 #endif /* __riscv_landing_pad  */
-  /* FIXME: Read enabled features from kernel and re-sync  */
+
+  /* Since we could failed to enable some features,
+     get enabled features from system again and sync it back.  */
+  int status = dl_cfi_get_cfi_status ();
+  GL(dl_riscv_feature_1) = status | (GL(dl_riscv_feature_1) &
+                           ~(GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS
+                             | GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED));
+  
+  /* Lock features if set to always_on  */
+#ifdef __riscv_landing_pad
+  if (GL(dl_riscv_feature_control).lp == cfi_always_on)
+      dl_cfi_lock_cfi (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED);
+#endif /* __riscv_landing_pad  */
+#ifdef __riscv_shadow_stack
+  if (GL(dl_riscv_feature_control).ss == cfi_always_on)
+      dl_cfi_lock_cfi (GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS);
+#endif /* __riscv_shadow_stack  */
+  /* FIXME: Should we terminate if failed to lock under always on mode? */
 }
 
 /* Enable CFI for l and its dependencies.  */
@@ -287,7 +306,6 @@ _dl_cfi_check (struct link_map *l, const char *program)
   info.feature_1_legacy_ss = 0;
 #endif
 
-  info.feature_1_enabled = GL(dl_riscv_feature_1);
   info.feature_1_legacy = 0;
 
 #ifdef SHARED
