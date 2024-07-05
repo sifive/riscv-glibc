@@ -55,7 +55,7 @@ dl_cfi_disable_cfi (unsigned int feature) {
 #ifdef __riscv_zicfilp
   if (feature & GNU_PROPERTY_RISCV_FEATURE_1_FCFI)
     {
-      res = prctl (PR_SET_INDIR_BR_LP_STATUS, 0);
+      res = prctl (PR_SET_INDIR_BR_LP_STATUS, 0, 0, 0, 0);
       if (res)
         return res;
     }
@@ -63,7 +63,7 @@ dl_cfi_disable_cfi (unsigned int feature) {
 #ifdef __riscv_zicfiss
   if (feature & GNU_PROPERTY_RISCV_FEATURE_1_BCFI)
     {
-      res |= prctl (PR_SET_SHADOW_STACK_STATUS, 0);
+      res |= prctl (PR_SET_SHADOW_STACK_STATUS, 0, 0, 0, 0);
       if (res)
         return res;
     }
@@ -76,14 +76,12 @@ dl_cfi_lock_cfi (unsigned int feature)
 {
   int res = 0;
 #ifdef __riscv_zicfilp
-  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_FCFI
-      && GL(dl_riscv_feature_control).lp == cfi_always_on)
-    res |= prctl (PR_LOCK_INDIR_BR_LP_STATUS);
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_FCFI)
+    res = prctl (PR_LOCK_INDIR_BR_LP_STATUS, 0, 0, 0, 0);
 #endif /* __riscv_zicfilp  */
 #ifdef __riscv_zicfiss
-  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_BCFI
-      && GL(dl_riscv_feature_control).ss == cfi_always_on)
-    res |= prctl (PR_LOCK_SHADOW_STACK_STATUS);
+  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_BCFI)
+    res = prctl (PR_LOCK_SHADOW_STACK_STATUS, 0, 0, 0, 0);
 #endif /* __riscv_zicfiss  */
   return res;
 }
@@ -94,12 +92,12 @@ dl_cfi_get_cfi_status (void) {
   int buf = 0;
   int ret = 0;
 #ifdef __riscv_zicfilp
-    ret = prctl (PR_GET_INDIR_BR_LP_STATUS, &buf);
+    ret = prctl (PR_GET_INDIR_BR_LP_STATUS, &buf, 0, 0, 0);
     if (!ret && buf)
       status |= GNU_PROPERTY_RISCV_FEATURE_1_FCFI;
 #endif /* __riscv_zicfilp  */
 #ifdef __riscv_zicfiss
-    ret = prctl (PR_GET_SHADOW_STACK_STATUS, &buf);
+    ret = prctl (PR_GET_SHADOW_STACK_STATUS, &buf, 0, 0, 0);
     if (!ret && buf)
       status |= GNU_PROPERTY_RISCV_FEATURE_1_BCFI;
 #endif /* __riscv_zicfiss  */

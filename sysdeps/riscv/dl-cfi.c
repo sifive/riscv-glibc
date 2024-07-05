@@ -90,7 +90,7 @@ dl_check_legacy_object (struct link_map *m, struct dl_cfi_info *info)
          These information would only be used by dlopen check for now.
          A dependency with a feature on will be record as legacy if the task
          did not enable the feature, however it is safe because the following
-         check will only be performed if the task has the feature on. */
+         check will only be performed if the task has the feature on.  */
 #ifdef __riscv_zicfilp
       if ((info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_FCFI) == 0
           && ((info->enable_feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_FCFI)
@@ -228,25 +228,35 @@ attribute_hidden void
 _dl_cfi_setup_features (unsigned int feature_1)
 {
   /* Enable features. Shadow stack is enabled earlier as it should
-   * be enabled in a function that never returns */
+   * be enabled in a function that never returns.  */
 #ifdef __riscv_zicfilp
   dl_cfi_enable_lp (feature_1);
 #endif /* __riscv_zicfilp  */
 
-  /* Since we could failed to enable some features
-     get enabled features from system again and sync it back  */
+  /* Since we could failed to enable some features,
+     get enabled features from system again and sync it back.  */
   int status = dl_cfi_get_cfi_status ();
-  GL(dl_riscv_feature_1) = status;
+  GL(dl_riscv_feature_1) = status | (GL(dl_riscv_feature_1) &
+                           ~(GNU_PROPERTY_RISCV_FEATURE_1_BCFI
+                             | GNU_PROPERTY_RISCV_FEATURE_1_FCFI));
   
-  /* Lock features if set to always_on */
-  dl_cfi_lock_cfi (status);
+  /* Lock features if set to always_on  */
+#ifdef __riscv_zicfilp
+  if (GL(dl_riscv_feature_control).lp == cfi_always_on)
+      dl_cfi_lock_cfi (GNU_PROPERTY_RISCV_FEATURE_1_FCFI);
+#endif /* __riscv_zicfilp  */
+#ifdef __riscv_zicfiss
+  if (GL(dl_riscv_feature_control).ss == cfi_always_on)
+      dl_cfi_lock_cfi (GNU_PROPERTY_RISCV_FEATURE_1_BCFI);
+#endif /* __riscv_zicfiss  */
+  /* FIXME: Should we terminate if failed to lock under always on mode? */
 }
 
 /* Enable CFI for l and its dependencies.  */
 void
 _dl_cfi_check (struct link_map *l, const char *program)
 {
-    /* As this point we have parsed the gnu properties
+    /* As this point we have parsed the gnu properties.
        For dynamic binary we should verify the dependencies here.  */
   struct dl_cfi_info info;
 #if defined SHARED && defined RTLD_START_ENABLE_RISCV_CFI
@@ -254,7 +264,7 @@ _dl_cfi_check (struct link_map *l, const char *program)
     {
       GL(dl_riscv_feature_1) = l->l_riscv_feature_1_and;
     }
-#endif /* SHARED */
+#endif /* SHARED  */
 
   unsigned int supported_exts = 0;
   unsigned int always_on_exts = 0;
@@ -272,11 +282,11 @@ _dl_cfi_check (struct link_map *l, const char *program)
 
   info.feature_1_enabled = GL(dl_riscv_feature_1);
 
-  /* No legacy check needed if all cfi exts are always on in main*/
+  /* No legacy check needed if all cfi exts are always on in main  */
   if (program && (supported_exts == always_on_exts))
     return;
 
-  /* No legacy check needed if all cfi exts are off */
+  /* No legacy check needed if all cfi exts are off  */
   if (info.feature_1_enabled == 0)
     return;
 
@@ -302,6 +312,6 @@ _dl_cfi_check (struct link_map *l, const char *program)
   if (program)
     dl_cfi_check_startup (l, &info);
   else
-#endif /* SHARED */
+#endif /* SHARED  */
     dl_cfi_check_dlopen (l, &info);
 }
