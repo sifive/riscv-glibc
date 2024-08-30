@@ -17,10 +17,12 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include "ucontext-macros.h"
+#include "tcb-offsets.h"
 
 /* int swapcontext (ucontext_t *oucp, const ucontext_t *ucp) */
 
 LEAF (__swapcontext)
+	LPAD
 	mv	t0, a1			/* Save ucp into t0.  */
 
 	SAVE_INT_REG (ra,   0, a0)
@@ -59,6 +61,26 @@ LEAF (__swapcontext)
 	sw	a1, MCONTEXT_FSR(a0)
 #endif /* __riscv_float_abi_soft */
 
+#ifdef __riscv_shadow_stack
+	/* Skip if shadow stack is not enabled */
+	ssrdp	ra
+	beqz	ra, .Lsave_fin
+
+	/* Read ssp_base from TLS  */
+	REG_L	t2, TLS_SSP_BASE_OFFSET(tp)
+	bnez	t2, .Lbase_saved
+
+	/* if not found, use current ssp as the marker  */
+	mv	t2, ra
+	REG_S	t2, TLS_SSP_BASE_OFFSET(tp)
+
+.Lbase_saved:
+	/* Save caller's ssp and base marker to oucp  */
+	REG_S	t2, UCONTEXT_SSP_BASE(a0)
+	REG_S	ra, UCONTEXT_SSP(a0)
+.Lsave_fin:
+#endif
+
 /* rt_sigprocmask (SIG_SETMASK, &ucp->uc_sigmask, &oucp->uc_sigmask, _NSIG8) */
 	li	a3, _NSIG8
 	add	a2, a0, UCONTEXT_SIGMASK
@@ -69,6 +91,55 @@ LEAF (__swapcontext)
 	scall
 
 	bltz	a0, 99f
+
+#ifdef __riscv_shadow_stack
+	/* Skip if shadow stack is not enabled */
+	ssrdp	ra
+	beqz	ra, .Lfin
+	/* Load ss information from ucp  */
+	REG_L	a0, UCONTEXT_SSP_BASE(t0)
+	REG_L	a1, UCONTEXT_SSP(t0)
+	REG_L   a2, TLS_SSP_BASE_OFFSET(tp)
+	bne	a0, a2, .Ldifferent_stack
+
+.Lunwind:
+	bleu    a1, ra, .Lfin
+	/* increase ssp by at most one page size to ensure the adjustment
+	   always runs into a guard page before accidentally pointing to
+	   another legal shadow stack page  */
+	/* ra = (a1 - ra >= 4096) ? ra + 4096 : a1  */
+	lui     t2, 1
+	add     ra, ra, t2
+	bleu    ra, a1, 1f
+	mv      ra, a1
+1:
+	csrw    ssp, ra
+	/* Test if the location pointed by ssp is legal  */
+	sspush  ra
+	sspopchk ra
+	j .Lunwind
+
+.Ldifferent_stack:
+	/* Create restore token  */
+	sspush  ra
+	mv	a4, a1
+
+.Lfind_rstor_token:
+	/* Probe and validate target restore token  */
+	ssamoswap.d a3, x0, (a4)
+	addi    a2, a4, 8
+	beq     a3, a2, .Lswitch_stack
+	/* Restore the shadow stack and try the next slot  */
+	ssamoswap.d x0, a3, (a4)
+	addi    a4, a4, -8
+	j	.Lfind_rstor_token
+
+.Lswitch_stack:
+	/* Switch stack: update ssp and base  */
+	csrw    ssp, a1
+	REG_S   a0, TLS_SSP_BASE_OFFSET(tp)
+.Lfin:
+#endif
 
 #ifndef __riscv_float_abi_soft
 	lw	t1, MCONTEXT_FSR(t0)
@@ -91,7 +162,11 @@ LEAF (__swapcontext)
 
 	/* Note the contents of argument registers will be random
 	   unless makecontext() has been called.  */
+#ifdef __riscv_landing_pad
+	RESTORE_INT_REG (t2,   0, t0)
+#else
 	RESTORE_INT_REG (t1,   0, t0)
+#endif
 	RESTORE_INT_REG (ra,   1, t0)
 	RESTORE_INT_REG (sp,   2, t0)
 	RESTORE_INT_REG (s0,   8, t0)
@@ -115,8 +190,12 @@ LEAF (__swapcontext)
 	RESTORE_INT_REG (s10, 26, t0)
 	RESTORE_INT_REG (s11, 27, t0)
 
+#ifdef __riscv_landing_pad
+	/* We need to use software-guared jump */
+	jr	t2
+#else
 	jr	t1
-
+#endif
 
 99:	tail	__syscall_error
 
