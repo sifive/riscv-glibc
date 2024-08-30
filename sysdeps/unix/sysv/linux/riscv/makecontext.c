@@ -21,6 +21,9 @@
 #include <sys/ucontext.h>
 #include <stdarg.h>
 #include <assert.h>
+#ifdef __riscv_shadow_stack
+#include <allocate-shadow-stack.h>
+#endif
 
 void
 __makecontext (ucontext_t *ucp, void (*func) (void), int argc,
@@ -73,6 +76,21 @@ __makecontext (ucontext_t *ucp, void (*func) (void), int argc,
 
       va_end (vl);
     }
+#ifdef __riscv_shadow_stack
+  /* Allocate shadow stack for the new context  */
+
+  /* shstk_size[0]: shadow stack base
+     shstk_size[1]: shadow stack size  */
+  shadow_stack_size_t shstk_size[2];
+  int ret = __allocate_shadow_stack(ucp->uc_stack.ss_size, shstk_size);
+  if (ret != 0)
+    {
+      abort();
+    }
+
+  ucp->uc_ssp_base = shstk_size[0];
+  ucp->uc_ssp = shstk_size[0] + shstk_size[1] - sizeof (shstk_size[0]);
+#endif
 }
 
 weak_alias (__makecontext, makecontext)
