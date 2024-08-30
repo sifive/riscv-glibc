@@ -17,11 +17,13 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include "ucontext-macros.h"
+#include "tcb-offsets.h"
 
 /* int getcontext (ucontext_t *ucp) */
 
 	.text
 LEAF (__getcontext)
+	LPAD
 	SAVE_INT_REG (ra,   0, a0)
 	SAVE_INT_REG (ra,   1, a0)
 	SAVE_INT_REG (sp,   2, a0)
@@ -57,6 +59,24 @@ LEAF (__getcontext)
 
 	sw	a1, MCONTEXT_FSR(a0)
 #endif /* __riscv_float_abi_soft */
+
+#ifdef __riscv_shadow_stack
+	ssrdp	t0
+	beqz	t0, .Lskip_ss
+	/* Read ssp_base from TLS  */
+	REG_L	t1, TLS_SSP_BASE_OFFSET(tp)
+
+	bnez	t1, .Lbase_saved
+	/* if not found, save and use current ssp as the marker  */
+	mv	t1, t0
+	REG_S	t1, TLS_SSP_BASE_OFFSET(tp)
+
+.Lbase_saved:
+	/* Save caller's ssp and base marker to ucontext  */
+	REG_S	t1, UCONTEXT_SSP_BASE(a0)
+	REG_S	t0, UCONTEXT_SSP(a0)
+.Lskip_ss:
+#endif
 
 /* rt_sigprocmask (SIG_BLOCK, NULL, &ucp->uc_sigmask, _NSIG8) */
 	li	a3, _NSIG8
