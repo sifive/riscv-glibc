@@ -1,4 +1,16 @@
-%if RISCV_ABI_XLEN == 64 && RISCV_ABI_FLEN == 64
+%if RISCV_ABI_XLEN == 64 && RISCV_ABI_FLEN == 64 && RISCV_USE_CFI == 1
+DEFAULT		GLIBC_2.27
+ld=ld-linux-riscv64-lp64d-cfi.so.1
+%elif RISCV_ABI_XLEN == 64 && RISCV_ABI_FLEN == 0 && RISCV_USE_CFI == 1
+DEFAULT		GLIBC_2.27
+ld=ld-linux-riscv64-lp64-cfi.so.1
+%elif RISCV_ABI_XLEN == 32 && RISCV_ABI_FLEN == 64 && RISCV_USE_CFI == 1
+DEFAULT		GLIBC_2.33
+ld=ld-linux-riscv32-ilp32d-cfi.so.1
+%elif RISCV_ABI_XLEN == 32 && RISCV_ABI_FLEN == 0 && RISCV_USE_CFI == 1
+DEFAULT		GLIBC_2.33
+ld=ld-linux-riscv32-ilp32-cfi.so.1
+%elif RISCV_ABI_XLEN == 64 && RISCV_ABI_FLEN == 64
 DEFAULT		GLIBC_2.27
 ld=ld-linux-riscv64-lp64d.so.1
 %elif RISCV_ABI_XLEN == 64 && RISCV_ABI_FLEN == 0

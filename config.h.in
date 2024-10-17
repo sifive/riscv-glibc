@@ -135,6 +135,9 @@
 /* RISC-V floating-point ABI for ld.so.  */
 #undef RISCV_ABI_FLEN
 
+/* RISC-V CFI for ld.so.  */
+#undef RISCV_USE_CFI
+
 /* LOONGARCH integer ABI for ld.so.  */
 #undef LOONGARCH_ABI_GRLEN
 

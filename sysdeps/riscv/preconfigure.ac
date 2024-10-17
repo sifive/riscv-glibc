@@ -7,6 +7,7 @@ riscv*)
     flen=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | sed -n 's/^#define __riscv_flen \(.*\)/\1/p'`
     float_abi=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | sed -n 's/^#define __riscv_float_abi_\([^ ]*\) .*/\1/p'`
     atomic=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | grep '#define __riscv_atomic' | cut -d' ' -f2`
+    cfi_gen=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | grep '#define __riscv_shadow_stack' | cut -d' ' -f2`
 
     case "$xlen" in
     64 | 32)
@@ -55,10 +56,22 @@ riscv*)
 	;;
     esac
 
+    # Checking shadow stack code generation only since this will cause
+    # compatibility issue, but landing pad won't.
+    case "$cfi_gen" in
+    __riscv_shadow_stack)
+        cfi=1
+        ;;
+    *)
+        cfi=0
+    esac
+
     base_machine=riscv
     machine=riscv/rv$xlen/$float_machine
 
     AC_DEFINE_UNQUOTED([RISCV_ABI_XLEN], [$xlen])
     AC_DEFINE_UNQUOTED([RISCV_ABI_FLEN], [$abi_flen])
+    AC_DEFINE_UNQUOTED([RISCV_USE_CFI], [$cfi])
+    LIBC_CONFIG_VAR([riscv-use-cfi], [$cfi])
     ;;
 esac
