@@ -15,3 +15,12 @@ ASFLAGS-.os += -Wa,-mno-relax
 ASFLAGS-.o += -Wa,-mno-relax
 sysdep-CFLAGS += -mno-relax
 endif
+
+# Enable RISC-V CFI
+ifeq (yes,$(riscv-enable-cfi))
+CFLAGS-.o += -fcf-protection=full
+CFLAGS-.os += -fcf-protection=full
+CFLAGS-.op += -fcf-protection=full
+CFLAGS-.oS += -fcf-protection=full
+asm-CPPFLAGS += -fcf-protection=full -include sysdep.h
+endif

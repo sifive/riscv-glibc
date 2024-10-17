@@ -79,6 +79,8 @@ riscv*)
 
     printf "%s\n" "#define RISCV_ABI_FLEN $abi_flen" >>confdefs.h
 
+    config_vars="$config_vars
+riscv-enable-cfi = $enable_cfi"
     ;;
 esac
 
