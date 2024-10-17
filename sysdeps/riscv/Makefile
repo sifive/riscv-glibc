@@ -16,3 +16,12 @@ ASFLAGS-.os += -Wa,-mno-relax
 ASFLAGS-.o += -Wa,-mno-relax
 sysdep-CFLAGS += -mno-relax
 endif
+
+# Enable RISC-V CFI
+ifeq (1,$(riscv-use-cfi))
+# Mark linker output CFI landing pad compatible, it warns on non-CFI inputs.
+sysdep-LDFLAGS += -Wl,-z,force-zicfilp
+# Make warnings fatal outside the test system.
+LDFLAGS-lib.so += -Wl,--fatal-warnings
+LDFLAGS-rtld += -Wl,-z,force-zicfilp,--fatal-warnings
+endif
