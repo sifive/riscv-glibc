@@ -60,5 +60,6 @@ riscv*)
 
     AC_DEFINE_UNQUOTED([RISCV_ABI_XLEN], [$xlen])
     AC_DEFINE_UNQUOTED([RISCV_ABI_FLEN], [$abi_flen])
+    LIBC_CONFIG_VAR([riscv-enable-cfi], [$enable_cfi])
     ;;
 esac
