@@ -81,10 +81,10 @@ dl_check_legacy_object (struct link_map *m, struct dl_cfi_info *info)
 #endif /* SHARED */
 
       info->enable_feature_1 &= ((l->l_riscv_feature_1_and
-                                  & (GNU_PROPERTY_RISCV_FEATURE_1_FCFI
-                                     | GNU_PROPERTY_RISCV_FEATURE_1_BCFI))
-                                  | ~(GNU_PROPERTY_RISCV_FEATURE_1_FCFI
-                                     | GNU_PROPERTY_RISCV_FEATURE_1_BCFI));
+                                  & (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
+                                     | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS))
+                                  | ~(GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
+                                     | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS));
 
       /* Bookkeeping first found mismatch object for both lp/ss.
          These information would only be used by dlopen check for now.
@@ -92,40 +92,40 @@ dl_check_legacy_object (struct link_map *m, struct dl_cfi_info *info)
          did not enable the feature, however it is safe because the following
          check will only be performed if the task has the feature on.  */
 #ifdef __riscv_zicfilp
-      if ((info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_FCFI) == 0
-          && ((info->enable_feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_FCFI)
-              != (info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_FCFI))
+      if ((info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED) == 0
+          && ((info->enable_feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+              != (info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED))
          )
         {
           info->feature_1_legacy_lp = i;
-          info->feature_1_legacy |= GNU_PROPERTY_RISCV_FEATURE_1_FCFI;
+          info->feature_1_legacy |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
         }
 #endif
 #ifdef __riscv_zicfiss
-      if ((info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_BCFI) == 0
-          && ((info->enable_feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_BCFI)
-              != (info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_BCFI))
+      if ((info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS) == 0
+          && ((info->enable_feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)
+              != (info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS))
          )
         {
           info->feature_1_legacy_ss = i;
-          info->feature_1_legacy |= GNU_PROPERTY_RISCV_FEATURE_1_BCFI;
+          info->feature_1_legacy |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS;
         }
 #endif
     }
 
   /* Keep bits set if cfi_always_on */
 #ifdef __riscv_zicfilp
-  if ((info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_FCFI) != 0
+  if ((info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED) != 0
       && info->enable_lp_type == cfi_always_on)
     {
-      info->enable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_FCFI;
+      info->enable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
     }
 #endif
 #ifdef __riscv_zicfiss
-  if ((info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_BCFI) != 0
+  if ((info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS) != 0
       && info->enable_ss_type == cfi_always_on)
     {
-      info->enable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_BCFI;
+      info->enable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS;
     }
 #endif
 }
@@ -136,24 +136,24 @@ dl_cfi_check_startup (struct link_map *m, struct dl_cfi_info *info)
 {
 #ifdef __riscv_zicfilp
   if (info->enable_lp_type == cfi_always_on)
-    info->enable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_FCFI;
+    info->enable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
   else if (info->enable_lp_type == cfi_always_off)
-    info->enable_feature_1 &= ~GNU_PROPERTY_RISCV_FEATURE_1_FCFI;
+    info->enable_feature_1 &= ~GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
   else
     info->enable_feature_1 &= ((m->l_riscv_feature_1_and
-                                & GNU_PROPERTY_RISCV_FEATURE_1_FCFI)
-                               | ~GNU_PROPERTY_RISCV_FEATURE_1_FCFI);
-#endif
-#ifdef __riscv_zicfiss
+                                & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+                               | ~GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED);
+# endif
+# ifdef __riscv_zicfiss
   if (info->enable_ss_type == cfi_always_on)
-    info->enable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_BCFI;
+    info->enable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS;
   else if (info->enable_ss_type == cfi_always_off)
-    info->enable_feature_1 &= ~GNU_PROPERTY_RISCV_FEATURE_1_BCFI;
+    info->enable_feature_1 &= ~GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS;
   else
     info->enable_feature_1 &= ((m->l_riscv_feature_1_and
-                                & GNU_PROPERTY_RISCV_FEATURE_1_BCFI)
-                               | ~GNU_PROPERTY_RISCV_FEATURE_1_BCFI);
-#endif
+                                & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)
+                               | ~GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS);
+# endif
 
   if (info->enable_feature_1 != 0)
     dl_check_legacy_object (m, info);
@@ -181,8 +181,8 @@ dl_cfi_check_dlopen (struct link_map *m, struct dl_cfi_info *info)
   const char *msg = NULL;
 
 #ifdef __riscv_zicfilp
-  if ((info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_FCFI) != 0
-      && (info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_FCFI) != 0)
+  if ((info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED) != 0
+      && (info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED) != 0)
     {
       if (info->enable_lp_type != cfi_permissive || !SINGLE_THREAD_P)
         {
@@ -190,13 +190,13 @@ dl_cfi_check_dlopen (struct link_map *m, struct dl_cfi_info *info)
           msg = N_("rebuild shared object with landing pad support");
         }
       else
-        disable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_FCFI;
+        disable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
     }
 #endif
 
 #ifdef __riscv_zicfiss
-  if ((info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_BCFI) != 0
-      && (info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_BCFI) != 0)
+  if ((info->feature_1_enabled & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS) != 0
+      && (info->feature_1_legacy & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS) != 0)
     {
       if (info->enable_ss_type != cfi_permissive || !SINGLE_THREAD_P)
         {
@@ -204,7 +204,7 @@ dl_cfi_check_dlopen (struct link_map *m, struct dl_cfi_info *info)
           msg = N_("rebuild shared object with shadow stack support");
         }
       else
-        disable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_BCFI;
+        disable_feature_1 |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS;
     }
 #endif
 
@@ -237,17 +237,17 @@ _dl_cfi_setup_features (unsigned int feature_1)
      get enabled features from system again and sync it back.  */
   int status = dl_cfi_get_cfi_status ();
   GL(dl_riscv_feature_1) = status | (GL(dl_riscv_feature_1) &
-                           ~(GNU_PROPERTY_RISCV_FEATURE_1_BCFI
-                             | GNU_PROPERTY_RISCV_FEATURE_1_FCFI));
+                           ~(GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS
+                             | GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED));
   
   /* Lock features if set to always_on  */
 #ifdef __riscv_zicfilp
   if (GL(dl_riscv_feature_control).lp == cfi_always_on)
-      dl_cfi_lock_cfi (GNU_PROPERTY_RISCV_FEATURE_1_FCFI);
+      dl_cfi_lock_cfi (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED);
 #endif /* __riscv_zicfilp  */
 #ifdef __riscv_zicfiss
   if (GL(dl_riscv_feature_control).ss == cfi_always_on)
-      dl_cfi_lock_cfi (GNU_PROPERTY_RISCV_FEATURE_1_BCFI);
+      dl_cfi_lock_cfi (GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS);
 #endif /* __riscv_zicfiss  */
   /* FIXME: Should we terminate if failed to lock under always on mode? */
 }
@@ -296,13 +296,13 @@ _dl_cfi_check (struct link_map *l, const char *program)
 #ifdef __riscv_zicfilp
   if (info.enable_lp_type != cfi_always_off)
     info.enable_feature_1 |= (info.feature_1_enabled
-            & GNU_PROPERTY_RISCV_FEATURE_1_FCFI);
+            & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED);
   info.feature_1_legacy_lp = 0;
 #endif
 #ifdef __riscv_zicfiss
   if (info.enable_ss_type != cfi_always_off)
     info.enable_feature_1 |= (info.feature_1_enabled
-            & GNU_PROPERTY_RISCV_FEATURE_1_BCFI);
+            & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS);
   info.feature_1_legacy_ss = 0;
 #endif
 

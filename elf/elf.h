@@ -1410,8 +1410,8 @@ typedef struct
 
 /* RISC-V specific GNU PROPERTY. */
 #define GNU_PROPERTY_RISCV_FEATURE_1_AND	0xc0000000
-#define GNU_PROPERTY_RISCV_FEATURE_1_FCFI	(1u << 0)
-#define GNU_PROPERTY_RISCV_FEATURE_1_BCFI	(1u << 1)
+#define GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED	(1u << 0)
+#define GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS	(1u << 1)
 
 /* Move records.  */
 typedef struct

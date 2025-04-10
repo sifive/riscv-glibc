@@ -34,11 +34,11 @@ get_cfi_feature (void)
 
 #ifdef __riscv_zicfilp
   if (GL(dl_riscv_feature_control).lp != cfi_always_off)
-    cfi_feature |= GNU_PROPERTY_RISCV_FEATURE_1_FCFI;
+    cfi_feature |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
 #endif
 #ifdef __riscv_zicfiss
   if (GL(dl_riscv_feature_control).ss != cfi_always_off)
-    cfi_feature |= GNU_PROPERTY_RISCV_FEATURE_1_BCFI;
+    cfi_feature |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS;
 #endif
   struct link_map *main_map = _dl_get_dl_main_map ();
 
@@ -53,8 +53,8 @@ get_cfi_feature (void)
         /* Enable landing pad and shstk only if they are enabled on a static
            executable.  */
         cfi_feature &= (main_map->l_riscv_feature_1_and
-                       & (GNU_PROPERTY_RISCV_FEATURE_1_FCFI
-                          | GNU_PROPERTY_RISCV_FEATURE_1_BCFI));
+                       & (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
+                          | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS));
 
         GL(dl_riscv_feature_1) = cfi_feature;
         break;
@@ -67,7 +67,7 @@ get_cfi_feature (void)
 #define ENABLE_RISCV_SHADOW_STACK                                       \
   do                                                                    \
     {                                                                   \
-      if (feature & GNU_PROPERTY_RISCV_FEATURE_1_BCFI)                  \
+      if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)                  \
         {                                                               \
           INTERNAL_SYSCALL_CALL (prctl, PR_SET_SHADOW_STACK_STATUS,     \
                                  PR_SHADOW_STACK_ENABLE);               \
