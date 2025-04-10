@@ -1412,6 +1412,7 @@ typedef struct
 #define GNU_PROPERTY_RISCV_FEATURE_1_AND	0xc0000000
 #define GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED	(1u << 0)
 #define GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS	(1u << 1)
+#define GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG (1u << 2)
 
 /* Move records.  */
 typedef struct

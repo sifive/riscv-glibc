@@ -53,7 +53,8 @@ static __always_inline int
 dl_cfi_disable_cfi (unsigned int feature) {
   int res = 0;
 #ifdef __riscv_zicfilp
-  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+  if (feature & (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
+		 | GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG))
     {
       res = prctl (PR_SET_INDIR_BR_LP_STATUS, 0, 0, 0, 0);
       if (res)
@@ -76,7 +77,8 @@ dl_cfi_lock_cfi (unsigned int feature)
 {
   int res = 0;
 #ifdef __riscv_zicfilp
-  if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+  if (feature & (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
+		 | GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG))
     res = prctl (PR_LOCK_INDIR_BR_LP_STATUS, 0, 0, 0, 0);
 #endif /* __riscv_zicfilp  */
 #ifdef __riscv_zicfiss
@@ -107,7 +109,8 @@ dl_cfi_get_cfi_status (void) {
 #ifdef __riscv_zicfilp
 static __always_inline int
 dl_cfi_enable_lp (unsigned int feature) {
-  if (!(feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED))
+  if (!(feature & (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
+		   | GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG)))
     return -1;
   return INTERNAL_SYSCALL_CALL (prctl, PR_SET_INDIR_BR_LP_STATUS,
                                 PR_INDIR_BR_LP_ENABLE, 0, 0, 0);

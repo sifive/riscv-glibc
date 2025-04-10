@@ -54,6 +54,7 @@ get_cfi_feature (void)
            executable.  */
         cfi_feature &= (main_map->l_riscv_feature_1_and
                        & (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
+			  | GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG
                           | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS));
 
         GL(dl_riscv_feature_1) = cfi_feature;
@@ -67,7 +68,7 @@ get_cfi_feature (void)
 #define ENABLE_RISCV_SHADOW_STACK                                       \
   do                                                                    \
     {                                                                   \
-      if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)                  \
+      if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)                \
         {                                                               \
           INTERNAL_SYSCALL_CALL (prctl, PR_SET_SHADOW_STACK_STATUS,     \
                                  PR_SHADOW_STACK_ENABLE);               \

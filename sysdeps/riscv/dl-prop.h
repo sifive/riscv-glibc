@@ -61,6 +61,8 @@ _dl_process_gnu_property (struct link_map *l, int fd, uint32_t type,
 #ifdef __riscv_zicfilp
       if (feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
         l->l_riscv_feature_1_and |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
+      if (feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG)
+        l->l_riscv_feature_1_and |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG;
 #endif
 #ifdef __riscv_zicfiss
       if (feature_1 & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)
