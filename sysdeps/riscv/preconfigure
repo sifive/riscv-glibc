@@ -8,7 +8,8 @@ riscv*)
     float_abi=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | sed -n 's/^#define __riscv_float_abi_\([^ ]*\) .*/\1/p'`
     atomic=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | grep '#define __riscv_atomic' | cut -d' ' -f2`
     cfi_gen=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | grep '#define __riscv_shadow_stack' | cut -d' ' -f2`
-    cfi_fc_gen=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | grep '#define __riscv_landing_pad_fixed_one' | cut -d' ' -f2`
+    cfi_fc_gen_1=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | grep '#define __riscv_landing_pad_fixed_one' | cut -d' ' -f2`
+    cfi_fc_gen_2=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | grep '#define __riscv_landing_pad_func_sig' | cut -d' ' -f2`
 
     case "$xlen" in
     64 | 32)
@@ -67,8 +68,13 @@ riscv*)
         cfi=0
     esac
 
-    case "$cfi_fc_gen" in
+    case "$cfi_fc_gen_1" in
     __riscv_landing_pad_fixed_one)
+        cfi=2
+        ;;
+    esac
+    case "$cfi_fc_gen_2" in
+    __riscv_landing_pad_func_sig)
         cfi=2
         ;;
     esac
