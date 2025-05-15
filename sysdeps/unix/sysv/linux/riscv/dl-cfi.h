@@ -91,7 +91,7 @@ dl_cfi_lock_cfi (unsigned int feature)
 static __always_inline int
 dl_cfi_get_cfi_status (void) {
   int status = 0;
-  int buf = 0;
+  long buf = 0;
   int ret = 0;
 #ifdef __riscv_zicfilp
     ret = prctl (PR_GET_INDIR_BR_LP_STATUS, &buf, 0, 0, 0);
