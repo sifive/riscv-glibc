@@ -123,9 +123,9 @@ GNU_PROPERTY (FEATURE_1_AND, __VALUE_FOR_FEATURE_1_AND)
 #    define SET_LPAD   lui  t2, 1
 #    define LPAD       lpad 1
 #  elif defined (__riscv_landing_pad_func_sig)
-/* FIXME: Same as fixed one for now.   */
-#    define SET_LPAD   lui  t2, 1
-#    define LPAD       lpad 1
+/* FIXME: Use 0 for now.   */
+#    define SET_LPAD   lui  t2, 0
+#    define LPAD       lpad 0
 #  else
 #    error "Unsppoorted landing pad type"
 #endif

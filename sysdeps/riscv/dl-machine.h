@@ -42,7 +42,7 @@ extern void _dl_cfi_setup_features (unsigned int features);
 #    define SET_LPAD   lui  t2, 1
 #  elif defined(__riscv_landing_pad_func_sig)
 /* FIXEME: set right lpad for func-sig */
-#    define SET_LPAD   lui  t2, 1
+#    define SET_LPAD   lui  t2, 0
 #  else
 #  endif
 #else
