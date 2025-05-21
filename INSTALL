@@ -155,6 +155,19 @@ passed to 'configure'.  For example:
 
      NOTE: '--enable-cet' is only supported on x86_64 and x32.
 
+'--enable-cfi'
+     Enable RISC-V Control Flow Integrity Extensions (Zicfilp/Zicfiss)
+     support.  When the GNU C Library is built with '--enable-cfi', the
+     resulting library is protected with landing pad and shadow stack.
+     This feature is currently supported on RV64 with GCC 15 and
+     binutils 2.45 or later.  With '--enable-cfi', it is an error to
+     dlopen a non CFI enabled shared library in CFI enabled application.
+     The restriction can be loosen by setting to permissive mode with
+     the use of the glibc tunables, see glibc tunables section for more
+     information.
+
+     NOTE: '--enable-cfi' is only supported on RV64.
+
 '--enable-memory-tagging'
      Enable memory tagging support if the architecture supports it.
      When the GNU C Library is built with this option then the resulting

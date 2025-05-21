@@ -21,6 +21,9 @@ Major new features:
 * The ISO C2Y family of unsigned abs functions, i.e.
   uabs, ulabs, ullabs and uimaxabs, are now supported.
 
+* Added --enable-cfi option to enable the RISC-V CFI extensions
+  (Zicfilp/Zicfiss) support on RV64 Linux.
+
 Deprecated and removed features, and other changes affecting compatibility:
 
 * The glibc.rtld.execstack now supports a compatibility mode to allow

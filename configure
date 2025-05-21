@@ -818,6 +818,7 @@ enable_nscd
 enable_pt_chown
 enable_mathvec
 enable_cet
+enable_cfi
 enable_scv
 enable_fortify_source
 with_cpu
@@ -1499,6 +1500,7 @@ Optional Features:
                           depends on architecture]
   --enable-cet            enable Intel Control-flow Enforcement Technology
                           (CET), x86 only
+  --enable-cfi            enable Control Flow Integrity (CFI), RISC-V only
   --disable-scv           syscalls will not use scv instruction, even if the
                           kernel supports it, powerpc only
   --enable-fortify-source[=1|2|3]
@@ -4849,6 +4851,16 @@ then :
   enableval=$enable_cet; enable_cet=$enableval
 else case e in #(
   e) enable_cet=$libc_cv_compiler_default_cet ;;
+esac
+fi
+
+
+# Check whether --enable-cfi was given.
+if test ${enable_cfi+y}
+then :
+  enableval=$enable_cfi; enable_cfi=$enableval
+else case e in #(
+  e) enable_cfi=no ;;
 esac
 fi
 
