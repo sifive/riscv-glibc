@@ -9,6 +9,9 @@ Version 2.44
 
 Major new features:
 
+* Added --enable-cfi option to enable the RISC-V CFI extensions
+  (Zicfilp/Zicfiss) support on RV64 Linux.
+
 * A new tunable, glibc.elf.thp, is added to map read-only segments with
   Transparent Huge Pages (THP) if THP isn't disable in kernel.  When
   glibc.elf.thp is set to 1, malloc uses the actual kernel THP mode
