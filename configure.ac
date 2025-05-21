@@ -421,6 +421,12 @@ AC_ARG_ENABLE([cet],
 	      [enable_cet=$enableval],
 	      [enable_cet=$libc_cv_compiler_default_cet])
 
+AC_ARG_ENABLE([cfi],
+	      AS_HELP_STRING([--enable-cfi],
+			     [enable Control Flow Integrity (CFI), RISC-V only]),
+	      [enable_cfi=$enableval],
+	      [enable_cfi=no])
+
 AC_ARG_ENABLE([scv],
 	      AS_HELP_STRING([--disable-scv],
 			     [syscalls will not use scv instruction, even if the kernel supports it, powerpc only]),

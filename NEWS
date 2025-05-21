@@ -9,6 +9,9 @@ Version 2.44
 
 Major new features:
 
+* Added --enable-cfi option to enable the RISC-V CFI extensions
+  (Zicfilp/Zicfiss) support on RV64 Linux.
+
 * Additional optimized and correctly rounded mathematical functions have
   been imported from the CORE-MATH project, in particular cosh, sinh, and
   tanh.
