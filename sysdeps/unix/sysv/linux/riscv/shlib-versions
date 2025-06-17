@@ -1,6 +1,6 @@
 %if RISCV_ABI_XLEN == 64 && RISCV_ABI_FLEN == 64
 DEFAULT		GLIBC_2.27
-ld=ld-linux-riscv64-lp64d-cfi.so.1
+ld=ld-linux-riscv64-lp64d.so.1
 %elif RISCV_ABI_XLEN == 64 && RISCV_ABI_FLEN == 0
 DEFAULT		GLIBC_2.27
 ld=ld-linux-riscv64-lp64.so.1
