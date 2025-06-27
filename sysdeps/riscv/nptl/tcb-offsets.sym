@@ -1,0 +1,5 @@
+#include <sysdep.h>
+#include <tls.h>
+#include <kernel-features.h>
+
+SSP_BASE_OFFSET     offsetof (tcbhead_t, ssp_base)
