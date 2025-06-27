@@ -44,6 +44,8 @@ typedef struct
 {
   dtv_t *dtv;
   void *private;
+  /* The marker for the current shadow stack.  */
+  unsigned long long int ssp_base;
 } tcbhead_t;
 
 /* This is the size of the initial TCB.  Because our TCB is before the thread
