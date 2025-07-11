@@ -5,6 +5,7 @@ sysdep_headers += \
   # sysdep_headers
 
 sysdep_routines += \
+  allocate-shadow-stack \
   flush-icache \
   hwprobe \
   # sysdep_routines
