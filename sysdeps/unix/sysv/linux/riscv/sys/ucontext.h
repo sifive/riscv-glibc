@@ -23,6 +23,7 @@
 
 #include <features.h>
 
+#include <bits/types/__sigset_t.h>
 #include <bits/types/sigset_t.h>
 #include <bits/types/stack_t.h>
 
@@ -90,7 +91,18 @@ typedef struct ucontext_t
     unsigned long int  __uc_flags;
     struct ucontext_t *uc_link;
     stack_t            uc_stack;
-    sigset_t           uc_sigmask;
+    /* Internal overlay for uc_sigmask to store CFI shadow stack state while
+       keeping the public API type as sigset_t.  */
+    union
+      {
+        sigset_t uc_sigmask; /* Public view.  */
+        struct
+          {
+            __ssp_sigset_t __saved_mask;
+            unsigned long int __ssp;
+            unsigned long int __ssp_base;
+          } __saved; /* Internal view.  */
+      };
     /* There's some padding here to allow sigset_t to be expanded in the
        future.  Though this is unlikely, other architectures put uc_sigmask
        at the end of this structure and explicitly state it can be
