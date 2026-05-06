@@ -55,7 +55,7 @@ dl_cfi_disable_cfi (unsigned int feature) {
 #ifdef __riscv_landing_pad
   if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
     {
-      res = prctl (PR_SET_INDIR_BR_LP_STATUS, 0, 0, 0, 0);
+      res = prctl (PR_SET_CFI, PR_CFI_BRANCH_LANDING_PADS, PR_CFI_DISABLE, 0, 0);
       if (res)
         return res;
     }
@@ -77,7 +77,8 @@ dl_cfi_lock_cfi (unsigned int feature)
   int res = 0;
 #ifdef __riscv_landing_pad
   if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
-    res |= prctl (PR_LOCK_INDIR_BR_LP_STATUS, 0, 0, 0, 0);
+    res |= prctl (PR_SET_CFI, PR_CFI_BRANCH_LANDING_PADS,
+                  PR_CFI_ENABLE | PR_CFI_LOCK, 0, 0);
 #endif /* __riscv_landing_pad  */
 #ifdef __riscv_shadow_stack
   if (feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)
@@ -92,7 +93,7 @@ dl_cfi_get_cfi_status (void) {
   unsigned long buf = 0;
   int ret = 0;
 #ifdef __riscv_landing_pad
-    ret = prctl (PR_GET_INDIR_BR_LP_STATUS, &buf, 0, 0, 0);
+    ret = prctl (PR_GET_CFI, PR_CFI_BRANCH_LANDING_PADS, &buf, 0, 0);
     if (!ret && buf)
       status |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
 #endif /* __riscv_landing_pad  */
@@ -109,7 +110,7 @@ static __always_inline int
 dl_cfi_enable_lp (unsigned int feature) {
   if (!(feature & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED))
     return -1;
-  return INTERNAL_SYSCALL_CALL (prctl, PR_SET_INDIR_BR_LP_STATUS,
-                                PR_INDIR_BR_LP_ENABLE, 0, 0, 0);
+  return INTERNAL_SYSCALL_CALL (prctl, PR_SET_CFI, PR_CFI_BRANCH_LANDING_PADS,
+                                PR_CFI_ENABLE, 0, 0);
 }
 #endif /* __riscv_landing_pad  */
